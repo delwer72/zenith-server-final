@@ -1,0 +1,40 @@
+import express, { Request, Response } from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { connectDB } from './config/db';
+import authRoutes from './routes/authRoutes';
+import listingRoutes from './routes/listingRoutes';
+import paymentRoutes from './routes/paymentRoutes';
+import reservationRoutes from './routes/reservationRoutes';
+
+dotenv.config();
+
+// Connect to database
+connectDB();
+
+const app = express();
+
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+
+app.get('/', (req: Request, res: Response) => {
+  res.send('API is running...');
+});
+
+app.use('/api/auth', authRoutes);
+app.use('/api/listings', listingRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/reservations', reservationRoutes);
+
+const PORT = process.env.PORT || 5000;
+
+// Vercel runs this file as a serverless function (it imports the exported
+// app and calls it directly per-request), it does not execute app.listen().
+// Only bind to a port when running locally / on a normal Node host.
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server running in ${process.env.NODE_ENV || 'development'} mode on port ${PORT}`);
+  });
+}
+
+export default app;
